@@ -43,14 +43,19 @@ mongoose
         const response = await fetch("https://remotive.com/api/remote-jobs");
         const data = await response.json();
         const remoteJobs = data.jobs;
-        remoteJobs.forEach(async (remoteJob) => {
-          try {
-            const job = new Job(remoteJob);
-            await job.save();
-          } catch (error) {
-            console.error("Error saving job:", error);
+
+        for (const remoteJob of remoteJobs) {
+          const existingJob = await Job.findOne({ id: remoteJob.id });
+
+          if (!existingJob) {
+            try {
+              const job = new Job(remoteJob);
+              await job.save();
+            } catch (error) {
+              console.error("Error saving job:", error);
+            }
           }
-        });
+        }
       } catch (error) {
         console.error("Error fetching remote jobs:", error);
       }
@@ -88,7 +93,7 @@ mongoose
         // Query the database to get all jobs
         const allJobs = await Job.find();
 
-        console.log(allJobs);
+        // console.log(allJobs);
         // Send all jobs data as JSON response
         res.json(allJobs);
       } catch (error) {
