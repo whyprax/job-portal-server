@@ -7,10 +7,8 @@ dotenv.config();
 const app = express();
 
 // Connect to MongoDB Atlas
-mongoose.connect(process.env.DB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// Connect to MongoDB Atlas
+mongoose.connect(process.env.DB_URL);
 
 // Define Mongoose schema for jobs
 const jobSchema = new mongoose.Schema({
@@ -141,10 +139,14 @@ app.get("/jobs", async (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+const PORT = process.env.PORT || 10000;
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
 
   // Fetch remote jobs when the server starts
   fetchRemoteJobs();
 });
+
+// Increase server timeouts to prevent intermittent timeouts or connection reset errors
+server.keepAliveTimeout = 120000; // 120 seconds
+server.headersTimeout = 120000; // 120 seconds
